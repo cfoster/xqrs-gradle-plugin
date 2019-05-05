@@ -36,14 +36,14 @@ public class XqrsPlugin implements Plugin<Project> {
     project.getTasks().create(
       options(
         "xqrsInit",
-        "Initialize XQRS code (does not overwrite any of your files)",
+        "Initialize and install XQRS code (never overwrites any of your files)",
         XqrsInitTask.class
       )
     );
     project.getTasks().create(
       options(
         "xqrsSyncImports",
-        "Syncs RESTXQ Resource Modules you've written so that they're imported by xqrs.xqy",
+        "Syncs RESTXQ Resource Modules you've written so that they're used by XQRS",
         XqrsSyncImports.class
       )
     );
