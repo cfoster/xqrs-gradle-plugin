@@ -1,0 +1,3 @@
+[submodule "src/main/resources/xqrs"]
+	path = src/main/resources/xqrs
+	url = git@github.com:cfoster/xqrs.git

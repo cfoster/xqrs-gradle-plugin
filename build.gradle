@@ -1,0 +1,26 @@
+group = 'com.xmllondon'
+version = '1.0.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+
+dependencies {
+    compile gradleApi()
+    testCompile 'junit:junit:4.12'
+}
+
+sourceSets {
+    main {
+        resources {
+            exclude '**/test-suite/*'
+            exclude '**/xqrs/README.md'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
