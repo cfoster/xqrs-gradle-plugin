@@ -1,10 +1,64 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
+    }
+}
+
+// First, apply the publishing plugin
+plugins {
+    id "com.gradle.plugin-publish" version "0.10.1"
+    id "java-gradle-plugin"
+    // Apply other plugins here, e.g. the kotlin plugin for a plugin written in Kotlin
+    // or the groovy plugin if the plugin uses Groovy
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+
+
 group = 'com.xmllondon'
-version = '1.0.0-SNAPSHOT'
+version = '0.9.9'
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
 sourceCompatibility = 1.8
+
+
+// Use java-gradle-plugin to generate plugin descriptors and specify plugin ids
+gradlePlugin {
+    plugins {
+        xqrsGradlePlugin {
+            id = 'com.xmllondon.xqrs-gradle-plugin'
+            implementationClass = 'com.xmllondon.xqrs.XqrsPlugin'
+        }
+    }
+}
+
+// The configuration example below shows the minimum required properties
+// configured to publish your plugin to the plugin portal
+pluginBundle {
+    website = 'https://github.com/cfoster/xqrs-gradle-plugin/'
+    vcsUrl = 'https://github.com/cfoster/xqrs-gradle-plugin/'
+    description = 'XQRS Gradle Plugin - to be used in conjunction with ml-gradle'
+    tags = ['ml-gradle', 'marklogic', 'xqrs', 'restxq']
+
+    plugins {
+        xqrsGradlePlugin {
+            // id is captured from java-gradle-plugin configuration
+            displayName = 'XQRS Gradle Plugin'
+        }
+    }
+}
+
+apply plugin: 'com.bmuschko.nexus'
+archivesBaseName = 'xqrs-gradle-plugin'
 
 dependencies {
     compile gradleApi()
@@ -20,7 +74,41 @@ sourceSets {
     }
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
+
+modifyPom {
+    project {
+        name 'xqrs-gradle-plugin'
+        description 'XQRS Gradle Plugin - to be used in conjunction with ml-gradle'
+        url 'https://github.com/cfoster/xqrs-gradle-plugin/'
+        inceptionYear '2019'
+        scm {
+            url 'https://github.com/cfoster/xqrs-gradle-plugin/'
+            connection 'scm:https://github.com/cfoster/xqrs-gradle-plugin.git'
+            developerConnection 'scm:git@github.com:cfoster/xqrs-gradle-plugin.git'
+        }
+        licenses {
+            license {
+                name 'The Apache Software License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+            }
+        }
+        developers {
+            developer {
+                id 'Foster'
+                name 'Charles Foster'
+                email 'charles@xmllondon.com'
+            }
+        }
+    }
+}
+extraArchive {
+    sources = true
+    tests = false
+    javadoc = true
+}
+nexus {
+    sign = true
+    repositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+    snapshotRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
 }
