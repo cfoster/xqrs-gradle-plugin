@@ -23,8 +23,7 @@ import org.gradle.api.UnknownTaskException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class XqrsPlugin implements Plugin<Project> {
 
@@ -48,17 +47,47 @@ public class XqrsPlugin implements Plugin<Project> {
       )
     );
 
-    try {
-      Task mlPrepareBundles =
-        project.getTasks().getByName("mlPrepareBundles");
+    Queue<String> preferredBindings = new LinkedList<String>();
+    preferredBindings.add("mlPrepareBundles");
+    preferredBindings.add("mlDeployApp");
+    preferredBindings.add("mlLoadModules");
+    preferredBindings.add("mlDeploy");
+    preferredBindings.add("hubDeployUserModules");
+    preferredBindings.add("loadUserModulesCommand");
 
-      if (mlPrepareBundles != null) {
-        mlPrepareBundles.dependsOn("xqrsSyncImports");
+    bindDependsOn(project, "xqrsSyncImports", preferredBindings);
+  }
+
+  private final void bindDependsOn(
+    Project project,
+    String dependsOnTask,
+    Queue<String> preferredBindings) {
+
+    String preferredMlTask = preferredBindings.poll();
+
+    try
+    {
+      Task preferredTaskToBindTo =
+        project.getTasks().getByName(preferredMlTask);
+
+      if (preferredTaskToBindTo != null) {
+        preferredTaskToBindTo.dependsOn(dependsOnTask);
+        return;
       }
     } catch(UnknownTaskException e) {
-      log.warn("Task 'mlPrepareBundles' is not around," +
-        " do you have the ml-gradle plugin installed?");
+      log.info("Tried to bind '"+dependsOnTask+"' to " +
+        "'"+preferredMlTask+"', but could not find that task.");
+
+      if(!preferredBindings.isEmpty()) {
+        bindDependsOn(project, dependsOnTask, preferredBindings);
+      } else {
+        log.warn(
+          "Could not find any suitable ml-gradle task to bind " +
+            "xqrsSyncImports to, do you have the ml-gradle plugin installed?");
+      }
     }
+
+
   }
 
   private Map<String,Object> options(
